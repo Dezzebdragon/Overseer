@@ -1,0 +1,100 @@
+import type { RequestChannel, RequestMap } from '@shared/ipc'
+import type { BigConfig, ProjectState } from '@shared/types'
+
+export function invoke<C extends RequestChannel>(
+  channel: C,
+  ...args: RequestMap[C][0]
+): Promise<RequestMap[C][1]> {
+  return window.api.invoke(channel, ...args)
+}
+
+export const ipc = {
+  openWorkspace: () => invoke('workspace:open'),
+  openProjectPath: (path: string) => invoke('workspace:openPath', path),
+  closeWorkspace: () => invoke('workspace:close'),
+  recentProjects: () => invoke('projects:recent'),
+  pickAndAddProject: () => invoke('projects:pickAndAdd'),
+  removeRecentProject: (path: string) => invoke('projects:removeRecent', path),
+  forgetProject: (path: string) => invoke('projects:forget', path),
+  scaffoldProject: (root: string) => invoke('projects:scaffold', root),
+  projectStatuses: (roots: string[]) => invoke('projects:statuses', roots),
+  lastProject: () => invoke('projects:lastOpened'),
+  hubFiles: (root: string) => invoke('hub:files', root),
+  gitGraph: (root: string) => invoke('git:graph', root),
+  gitCommitMetrics: (root: string, shas: string[]) => invoke('git:commitMetrics', root, shas),
+  gitFileAtCommit: (root: string, relPath: string, hash: string) =>
+    invoke('git:fileAtCommit', root, relPath, hash),
+  gitFileHistory: (root: string, relPath: string) => invoke('git:fileHistory', root, relPath),
+  gitCommitFiles: (root: string, hash: string) => invoke('git:commitFiles', root, hash),
+  gitDeletedPaths: (root: string) => invoke('git:deletedPaths', root),
+  gitTreeAtCommit: (root: string, hash: string) => invoke('git:treeAtCommit', root, hash),
+  gitLastFileCommit: (root: string, relPath: string) => invoke('git:lastFileCommit', root, relPath),
+  gitCommitBody: (root: string, sha: string) => invoke('git:commitBody', root, sha),
+  gitCommit: (root: string, message: string, stageAll: boolean) => invoke('git:commit', root, message, stageAll),
+  gitCreateBranch: (root: string, name: string, base: string, checkout: boolean) => invoke('git:createBranch', root, name, base, checkout),
+  gitCheckout: (root: string, target: string) => invoke('git:checkout', root, target),
+  gitMerge: (root: string, branch: string, noFf: boolean) => invoke('git:merge', root, branch, noFf),
+  gitBranches: (root: string) => invoke('git:branches', root),
+  gitMergeState: (root: string) => invoke('git:mergeState', root),
+  gitConflictVersions: (root: string, relPath: string) => invoke('git:conflictVersions', root, relPath),
+  gitStageResolved: (root: string, relPath: string, content: string) => invoke('git:stageResolved', root, relPath, content),
+  gitCompleteMerge: (root: string, message: string | undefined) => invoke('git:completeMerge', root, message),
+  gitAbortMerge: (root: string) => invoke('git:abortMerge', root),
+  pmGetState: (root: string) => invoke('pm:getState', root),
+  pmSetState: (root: string, state: ProjectState) => invoke('pm:setState', root, state),
+  pmGetConfig: (root: string) => invoke('pm:getConfig', root),
+  pmSetConfig: (root: string, config: BigConfig) => invoke('pm:setConfig', root, config),
+  getSelectedTemplate: () => invoke('templates:getSelected'),
+  setSelectedTemplate: (name: string) => invoke('templates:setSelected', name),
+  saveState: (state: RequestMap['workspace:saveState'][0][0]) =>
+    invoke('workspace:saveState', state),
+  readDir: (path: string) => invoke('dir:read', path),
+  readFile: (path: string) => invoke('file:read', path),
+  writeFile: (args: RequestMap['file:write'][0][0]) => invoke('file:write', args),
+  createEntry: (path: string, isDir: boolean) => invoke('file:create', path, isDir),
+  rename: (from: string, to: string) => invoke('file:rename', from, to),
+  remove: (path: string) => invoke('file:delete', path),
+  getSettings: () => invoke('settings:get'),
+  setSettings: (s: RequestMap['settings:set'][0][0]) => invoke('settings:set', s),
+  revealInOS: (path: string) => invoke('shell:showItem', path),
+  revealTemplateFile: (name: string, relPath: string) =>
+    invoke('templates:revealFile', name, relPath),
+  projectStats: (root: string) => invoke('metrics:projectStats', root),
+  accountGet: () => invoke('account:get'),
+  accountSetClientId: (id: string | null) => invoke('account:setClientId', id),
+  accountBeginConnect: () => invoke('account:beginConnect'),
+  accountCancelConnect: () => invoke('account:cancelConnect'),
+  accountDisconnect: () => invoke('account:disconnect'),
+  accountForget: (login: string) => invoke('account:forget', login),
+  githubListRepos: () => invoke('github:listRepos'),
+  githubClone: (cloneUrl: string, destParent: string) =>
+    invoke('github:clone', cloneUrl, destParent),
+  pickDirectory: () => invoke('dialog:pickDirectory'),
+  pickFile: () => invoke('dialog:pickFile'),
+  hubRepairInfo: (root: string) => invoke('hub:repairInfo', root),
+  hubSetRequiredDocs: (root: string, names: string[]) =>
+    invoke('hub:setRequiredDocs', root, names),
+  hubAddRequiredFile: (root: string, sourceAbs: string) =>
+    invoke('hub:addRequiredFile', root, sourceAbs),
+  hubApplyRepair: (root: string, names: string[]) => invoke('hub:applyRepair', root, names),
+  windowAction: (action: string) => invoke('window:action', action),
+  windowIsMaximized: () => invoke('window:isMaximized'),
+  agentsList: (root: string | null) => invoke('agents:list', root),
+  agentsDetect: () => invoke('agents:detect'),
+  agentsPlanRegister: (id: string) => invoke('agents:planRegister', id),
+  agentsRegister: (id: string) => invoke('agents:register', id),
+  agentsUnregister: (id: string) => invoke('agents:unregister', id),
+  agentsOpenBackup: (id: string) => invoke('agents:openBackup', id),
+  logHistory: () => invoke('log:history'),
+  logWrite: (level: import('@shared/types').LogLevel, source: string, message: string) =>
+    invoke('log:write', level, source, message),
+  logClear: () => invoke('log:clear'),
+  termProfiles: () => invoke('term:profiles'),
+  termList: () => invoke('term:list'),
+  termCreate: (profileId: string, cwd: string | null) => invoke('term:create', profileId, cwd),
+  termWrite: (id: string, data: string) => invoke('term:write', id, data),
+  termResize: (id: string, cols: number, rows: number) => invoke('term:resize', id, cols, rows),
+  termKill: (id: string) => invoke('term:kill', id),
+  clipboardRead: () => invoke('clipboard:read'),
+  clipboardWrite: (text: string) => invoke('clipboard:write', text)
+}

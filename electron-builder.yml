@@ -1,0 +1,26 @@
+appId: com.yourteam.customide
+productName: Custom IDE
+directories:
+  buildResources: build
+  output: dist
+files:
+  - out/**/*
+  - package.json
+# The default template is copied into userData on first run.
+extraResources:
+  - from: templates
+    to: templates
+# npm dependencies (e.g. chokidar) are packaged automatically; renderer libs are bundled by Vite.
+win:
+  target:
+    - nsis
+  # Provide a code-signing certificate before public distribution (SmartScreen).
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Development
+  maintainer: Your Team <team@example.com>
